@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이투스247학원 2026 졸업생 재원후기</title>
+  <meta
+    name="description"
+    content="이투스247학원 지점별 2026년 졸업생 재원후기를 한눈에 볼 수 있는 아카이브 페이지"
+  >
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=SUIT:wght@400;500;600;700;800&family=Montserrat:wght@600;700;800&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">2026 Graduate Review Archive</p>
+        <h1>이투스247학원 지점별 재원후기</h1>
+        <p class="hero-text">
+          2026년 졸업생들이 직접 남긴 재원후기를 지점별로 살펴보세요.
+          학습 코칭, 생활 관리, 콘텐츠 활용 경험까지 한 페이지에서 탐색할 수 있습니다.
+        </p>
+        <div class="hero-actions">
+          <a class="hero-button primary" href="#review-browser">후기 둘러보기</a>
+          <a class="hero-button secondary" href="#branch-grid">지점 바로 찾기</a>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <div class="panel-label">Preview</div>
+        <div class="hero-panel-card">
+          <p class="mini-title">후기 탐색 포인트</p>
+          <ul class="hero-points">
+            <li>지점별 빠른 이동</li>
+            <li>재원유형 필터</li>
+            <li>만족도 기준 정렬</li>
+            <li>후기 상세 모달</li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="stats-grid" id="stats-grid"></section>
+
+      <section class="branch-section" id="branch-grid">
+        <div class="section-heading">
+          <p class="section-kicker">Branch Map</p>
+          <h2>지점별로 바로 이동</h2>
+        </div>
+        <div class="branch-grid" id="branch-buttons"></div>
+      </section>
+
+      <section class="browser-section" id="review-browser">
+        <div class="section-heading browser-heading">
+          <div>
+            <p class="section-kicker">Review Browser</p>
+            <h2>후기 탐색</h2>
+          </div>
+          <p class="browser-caption" id="result-summary">데이터를 불러오는 중입니다.</p>
+        </div>
+
+        <div class="toolbar">
+          <label class="field">
+            <span>지점</span>
+            <select id="branch-filter">
+              <option value="all">전체 지점</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>재원유형</span>
+            <select id="type-filter">
+              <option value="all">전체 유형</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>정렬</span>
+            <select id="sort-filter">
+              <option value="satisfaction">만족도 높은 순</option>
+              <option value="latest">데이터 순서</option>
+              <option value="branch">지점 가나다순</option>
+            </select>
+          </label>
+
+          <label class="field search-field">
+            <span>검색</span>
+            <input id="search-input" type="search" placeholder="지점명, 이름, 후기 키워드 검색">
+          </label>
+        </div>
+
+        <div class="active-filters" id="active-filters"></div>
+        <div class="review-grid" id="review-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog class="review-modal" id="review-modal">
+    <button class="modal-close" id="modal-close" aria-label="닫기">×</button>
+    <div class="modal-body" id="modal-body"></div>
+  </dialog>
+
+  <template id="review-card-template">
+    <article class="review-card">
+      <div class="card-topline">
+        <span class="branch-badge"></span>
+        <span class="type-badge"></span>
+      </div>
+      <div class="card-head">
+        <div>
+          <h3 class="reviewer-name"></h3>
+          <p class="satisfaction-text"></p>
+        </div>
+        <div class="score-ring">
+          <span class="score-value"></span>
+        </div>
+      </div>
+      <div class="highlight-block">
+        <p class="highlight-label">가장 인상 깊었던 코칭</p>
+        <h4 class="highlight-title"></h4>
+        <p class="highlight-copy"></p>
+      </div>
+      <div class="meta-grid">
+        <div class="meta-item">
+          <span>학습관리</span>
+          <strong class="learning-title"></strong>
+        </div>
+        <div class="meta-item">
+          <span>생활관리</span>
+          <strong class="life-title"></strong>
+        </div>
+        <div class="meta-item">
+          <span>콘텐츠</span>
+          <strong class="content-title"></strong>
+        </div>
+      </div>
+      <button class="detail-button" type="button">후기 전체보기</button>
+    </article>
+  </template>
+
+  <script src="data/reviews.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
