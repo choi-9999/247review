@@ -144,7 +144,7 @@ const buildStats = (reviews) => {
     {
       label: "전체 후기 수",
       value: `${formatNumber(reviews.length)}개`,
-      subcopy: "2026년 졸업생 후기 기준",
+      subcopy: "25-26년 졸업생 후기 기준",
     },
     {
       label: "참여 지점 수",
