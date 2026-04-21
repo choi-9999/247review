@@ -1,6 +1,7 @@
 const elements = {
   statsGrid: document.getElementById("stats-grid"),
   branchButtons: document.getElementById("branch-buttons"),
+  yearFilter: document.getElementById("year-filter"),
   branchFilter: document.getElementById("branch-filter"),
   typeFilter: document.getElementById("type-filter"),
   sortFilter: document.getElementById("sort-filter"),
@@ -19,6 +20,7 @@ const state = {
   reviews: [],
   filters: {
     branch: "all",
+    year: "all",
     type: "all",
     sort: "satisfaction",
     search: "",
@@ -110,6 +112,11 @@ const getCategoryBreakdown = (reviews, key) => {
 
 const getResponseOptions = (reviews, key) =>
   [...new Set(reviews.map((review) => normalizeLabel(review[key] || "미응답")))].sort((a, b) => a.localeCompare(b, "ko"));
+
+const getResponseBaseReviews = (reviews) => {
+  if (state.filters.year === "all") return reviews;
+  return reviews.filter((review) => String(review.graduationYear) === state.filters.year);
+};
 
 const getDonutGradient = (segments) => {
   let current = 0;
@@ -209,16 +216,27 @@ const buildStats = (reviews) => {
 };
 
 const populateFilters = (reviews) => {
+  const years = [...new Set(reviews.map((review) => review.graduationYear))].sort((a, b) => b - a);
   const branches = [...new Set(reviews.map((review) => review.branch))].sort((a, b) => a.localeCompare(b, "ko"));
   const types = [...new Set(reviews.map((review) => review.studentType))].sort((a, b) => a.localeCompare(b, "ko"));
+  const responseBaseReviews = getResponseBaseReviews(reviews);
+
+  elements.yearFilter.innerHTML = `<option value="all">전체 연도</option>${years
+    .map((year) => `<option value="${year}">${year}</option>`)
+    .join("")}`;
+  elements.yearFilter.value = state.filters.year;
 
   elements.branchFilter.innerHTML = `<option value="all">전체 지점</option>${branches
     .map((branch) => `<option value="${branch}">${branch}</option>`)
     .join("")}`;
+  if (!branches.includes(state.filters.branch)) state.filters.branch = "all";
+  elements.branchFilter.value = state.filters.branch;
 
   elements.typeFilter.innerHTML = `<option value="all">전체 유형</option>${types
     .map((type) => `<option value="${type}">${type}</option>`)
     .join("")}`;
+  if (!types.includes(state.filters.type)) state.filters.type = "all";
+  elements.typeFilter.value = state.filters.type;
 
   const counts = branches.map((branch) => ({
     branch,
@@ -238,7 +256,10 @@ const populateFilters = (reviews) => {
 
   elements.responseFilterGroups.innerHTML = responseCategories
     .map(({ key, label }) => {
-      const options = getResponseOptions(reviews, key);
+      const options = getResponseOptions(responseBaseReviews, key);
+      if (!options.includes(state.filters.responses[key])) {
+        state.filters.responses[key] = "all";
+      }
       const buttons = ["all", ...options]
         .map((option) => {
           const isAll = option === "all";
@@ -271,6 +292,7 @@ const syncActiveFilters = () => {
   const chips = [];
 
   if (state.filters.branch !== "all") chips.push(`지점: ${state.filters.branch}`);
+  if (state.filters.year !== "all") chips.push(`연도: ${state.filters.year}`);
   if (state.filters.type !== "all") chips.push(`유형: ${state.filters.type}`);
   responseCategories.forEach(({ key, label }) => {
     if (state.filters.responses[key] !== "all") {
@@ -290,6 +312,10 @@ const filteredReviews = () => {
 
   if (state.filters.branch !== "all") {
     result = result.filter((review) => review.branch === state.filters.branch);
+  }
+
+  if (state.filters.year !== "all") {
+    result = result.filter((review) => String(review.graduationYear) === state.filters.year);
   }
 
   if (state.filters.type !== "all") {
@@ -413,6 +439,12 @@ const renderReviews = () => {
 };
 
 const attachEvents = () => {
+  elements.yearFilter.addEventListener("change", (event) => {
+    state.filters.year = event.target.value;
+    populateFilters(state.reviews);
+    renderReviews();
+  });
+
   elements.branchFilter.addEventListener("change", (event) => {
     state.filters.branch = event.target.value;
     renderReviews();
