@@ -49,6 +49,11 @@ const normalizeLabel = (value) => {
   return value;
 };
 
+const normalizeBranch = (value) => {
+  if (value === "광주동구(남)" || value === "광주동구(여)") return "광주동구";
+  return value;
+};
+
 const responseCategories = [
   { key: "coachingTitle", label: "코칭시스템" },
   { key: "learningTitle", label: "학습관리시스템" },
@@ -500,9 +505,12 @@ const init = async () => {
   try {
     const reviews = Array.isArray(window.__REVIEWS__) ? window.__REVIEWS__ : [];
     if (!reviews.length) throw new Error("후기 데이터가 비어 있습니다.");
-    state.reviews = reviews;
-    buildStats(reviews);
-    populateFilters(reviews);
+    state.reviews = reviews.map((review) => ({
+      ...review,
+      branch: normalizeBranch(review.branch),
+    }));
+    buildStats(state.reviews);
+    populateFilters(state.reviews);
     attachEvents();
     renderReviews();
   } catch (error) {
