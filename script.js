@@ -5,6 +5,7 @@ const elements = {
   typeFilter: document.getElementById("type-filter"),
   sortFilter: document.getElementById("sort-filter"),
   searchInput: document.getElementById("search-input"),
+  responseFilterGroups: document.getElementById("response-filter-groups"),
   activeFilters: document.getElementById("active-filters"),
   reviewGrid: document.getElementById("review-grid"),
   resultSummary: document.getElementById("result-summary"),
@@ -21,6 +22,12 @@ const state = {
     type: "all",
     sort: "satisfaction",
     search: "",
+    responses: {
+      coachingTitle: "all",
+      learningTitle: "all",
+      lifeTitle: "all",
+      contentTitle: "all",
+    },
   },
 };
 
@@ -39,6 +46,13 @@ const normalizeLabel = (value) => {
   if (value === "면학 분위기 감독 졸음 관리") return "면학 분위기 감독";
   return value;
 };
+
+const responseCategories = [
+  { key: "coachingTitle", label: "코칭시스템" },
+  { key: "learningTitle", label: "학습관리시스템" },
+  { key: "lifeTitle", label: "생활관리시스템" },
+  { key: "contentTitle", label: "콘텐츠" },
+];
 
 const maskName = (name) => {
   if (!name) return "익명";
@@ -93,6 +107,9 @@ const getCategoryBreakdown = (reviews, key) => {
   const top = sorted[0] || { label: "-", count: 0, percent: 0 };
   return { top, segments: visible };
 };
+
+const getResponseOptions = (reviews, key) =>
+  [...new Set(reviews.map((review) => normalizeLabel(review[key] || "미응답")))].sort((a, b) => a.localeCompare(b, "ko"));
 
 const getDonutGradient = (segments) => {
   let current = 0;
@@ -218,6 +235,36 @@ const populateFilters = (reviews) => {
       `
     )
     .join("");
+
+  elements.responseFilterGroups.innerHTML = responseCategories
+    .map(({ key, label }) => {
+      const options = getResponseOptions(reviews, key);
+      const buttons = ["all", ...options]
+        .map((option) => {
+          const isAll = option === "all";
+          const text = isAll ? "전체" : option;
+          const isActive = state.filters.responses[key] === option;
+          return `
+            <button
+              class="response-chip${isActive ? " is-active" : ""}"
+              type="button"
+              data-response-key="${key}"
+              data-response-value="${escapeHtml(option)}"
+            >
+              ${escapeHtml(text)}
+            </button>
+          `;
+        })
+        .join("");
+
+      return `
+        <article class="response-filter-group">
+          <h4>${label}</h4>
+          <div class="response-chip-row">${buttons}</div>
+        </article>
+      `;
+    })
+    .join("");
 };
 
 const syncActiveFilters = () => {
@@ -225,6 +272,11 @@ const syncActiveFilters = () => {
 
   if (state.filters.branch !== "all") chips.push(`지점: ${state.filters.branch}`);
   if (state.filters.type !== "all") chips.push(`유형: ${state.filters.type}`);
+  responseCategories.forEach(({ key, label }) => {
+    if (state.filters.responses[key] !== "all") {
+      chips.push(`${label}: ${state.filters.responses[key]}`);
+    }
+  });
   if (state.filters.search) chips.push(`검색: ${state.filters.search}`);
   if (state.filters.sort === "branch") chips.push("정렬: 지점 가나다순");
   if (state.filters.sort === "latest") chips.push("정렬: 데이터 순서");
@@ -243,6 +295,12 @@ const filteredReviews = () => {
   if (state.filters.type !== "all") {
     result = result.filter((review) => review.studentType === state.filters.type);
   }
+
+  responseCategories.forEach(({ key }) => {
+    if (state.filters.responses[key] !== "all") {
+      result = result.filter((review) => normalizeLabel(review[key] || "미응답") === state.filters.responses[key]);
+    }
+  });
 
   if (state.filters.search) {
     const keyword = state.filters.search.toLowerCase();
@@ -381,6 +439,15 @@ const attachEvents = () => {
     state.filters.branch = button.dataset.branch;
     elements.branchFilter.value = button.dataset.branch;
     document.getElementById("review-browser").scrollIntoView({ behavior: "smooth", block: "start" });
+    renderReviews();
+  });
+
+  elements.responseFilterGroups.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-response-key]");
+    if (!button) return;
+    const { responseKey, responseValue } = button.dataset;
+    state.filters.responses[responseKey] = responseValue;
+    populateFilters(state.reviews);
     renderReviews();
   });
 
