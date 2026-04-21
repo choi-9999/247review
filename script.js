@@ -123,6 +123,11 @@ const getResponseBaseReviews = (reviews) => {
   return reviews.filter((review) => String(review.graduationYear) === state.filters.year);
 };
 
+const getYearScopedReviews = (reviews) => {
+  if (state.filters.year === "all") return reviews;
+  return reviews.filter((review) => String(review.graduationYear) === state.filters.year);
+};
+
 const getDonutGradient = (segments) => {
   let current = 0;
   const stops = segments.map((segment) => {
@@ -140,11 +145,13 @@ const getDonutGradient = (segments) => {
 
 const buildStats = (reviews) => {
   const branches = new Set(reviews.map((review) => review.branch));
+  const totalSubcopy =
+    state.filters.year === "all" ? "25-26년 졸업생 후기 기준" : `${state.filters.year}년 졸업생 후기 기준`;
   const summaryStats = [
     {
       label: "전체 후기 수",
       value: `${formatNumber(reviews.length)}개`,
-      subcopy: "25-26년 졸업생 후기 기준",
+      subcopy: totalSubcopy,
     },
     {
       label: "참여 지점 수",
@@ -446,6 +453,7 @@ const renderReviews = () => {
 const attachEvents = () => {
   elements.yearFilter.addEventListener("change", (event) => {
     state.filters.year = event.target.value;
+    buildStats(getYearScopedReviews(state.reviews));
     populateFilters(state.reviews);
     renderReviews();
   });
@@ -509,7 +517,7 @@ const init = async () => {
       ...review,
       branch: normalizeBranch(review.branch),
     }));
-    buildStats(state.reviews);
+    buildStats(getYearScopedReviews(state.reviews));
     populateFilters(state.reviews);
     attachEvents();
     renderReviews();
