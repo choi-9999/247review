@@ -46,6 +46,7 @@ const escapeHtml = (value) =>
 
 const normalizeLabel = (value) => {
   if (value === "면학 분위기 감독 졸음 관리") return "면학 분위기 감독";
+  if (value === "1:1 질의응답") return "1:1 질의 응답";
   return value;
 };
 
